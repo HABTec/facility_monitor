@@ -78,7 +78,7 @@ const OrgunitWidget = ({
         .then(handelLoadComplete);
   }, [orgunit?.id]);
 
-
+  console.log(orgunit,"from the widget");
   // const { loading, error, data, refetch } = useDataQuery(
   //   {
   //     orgUnits: UsersQuery.orgUnitUsers({orgUnit:orgunit}),
@@ -111,6 +111,9 @@ const OrgunitWidget = ({
                         User Count
                     </StackedTableCellHead>
                     <StackedTableCellHead>
+                        Children
+                    </StackedTableCellHead>
+                    <StackedTableCellHead>
                         Last Active
                     </StackedTableCellHead>
                 </StackedTableRowHead>
@@ -122,6 +125,9 @@ const OrgunitWidget = ({
                     </StackedTableCell>
                     <StackedTableCell>
                           {userCount}
+                    </StackedTableCell>
+                    <StackedTableCell>
+                          {orgunit.children}
                     </StackedTableCell>
                     <StackedTableCell>
                       { lastLogin }
