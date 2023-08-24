@@ -10,6 +10,7 @@ import { spacers, spacersNum } from '@dhis2/ui';
 
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import DataElementTable from "../components/DataElementTable";
+import OrgunitWidget from "../components/OrgunitWidget";
 
 //const selectedDataElmentGroupQuery = {
 //  dataElements: {
@@ -152,17 +153,21 @@ const Home = (props) => {
           ) : (
             <></>
           )}
+            { selectedOrgUnit?.id ?
+              <OrgunitWidget orgunit={selectedOrgUnit} ></OrgunitWidget>
+              :<></>
+            }
         </div>
         <div className={classes.container}>
 
-          { selectedOrgUnit?.id ?
+          { selectedOrgUnit?.id ?<>
           <DataElementTable
             loading={loading}
             orgunits={
               orgUnits
             }
             selectedOrgUnit={selectedOrgUnit}
-          ></DataElementTable>:<></>}
+          ></DataElementTable></>:<></>}
             {pageCount>1?
             <Pagination className={classes.pagination}
                 onPageChange={setPage}
