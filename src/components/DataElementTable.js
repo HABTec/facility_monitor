@@ -39,7 +39,7 @@ const DataElementTable = ({ loading, orgunits, selectedOrgUnit}) => {
         <DataTable>
           <TableHead>
             <DataTableRow>
-              <DataTableColumnHeader>Facility</DataTableColumnHeader>
+              <DataTableColumnHeader>OrgUnit</DataTableColumnHeader>
               <DataTableColumnHeader>User Count</DataTableColumnHeader>
               <DataTableColumnHeader>Last Active</DataTableColumnHeader>
             </DataTableRow>
