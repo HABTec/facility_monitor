@@ -78,21 +78,6 @@ const OrgunitWidget = ({
         .then(handelLoadComplete);
   }, [orgunit?.id]);
 
-  console.log(orgunit,"from the widget");
-  // const { loading, error, data, refetch } = useDataQuery(
-  //   {
-  //     orgUnits: UsersQuery.orgUnitUsers({orgUnit:orgunit}),
-  //   },
-  //   {
-  //     variables: { orgunit },
-  //     onComplete: handelLoadComplete,
-  //   }
-  // );
-
-  // useEffect(() => {
-  //   refetch();
-  // }, [orgunit?.id]);
-
   return (
     <div
     style={{
@@ -101,40 +86,40 @@ const OrgunitWidget = ({
       minWidth: spacers.dp384,
     }}
   >
-        <StackedTable>
-            <StackedTableHead>
-                <StackedTableRowHead>
-                    <StackedTableCellHead>
-                        Selected Orgunits
-                    </StackedTableCellHead>
-                    <StackedTableCellHead>
-                        User Count
-                    </StackedTableCellHead>
-                    <StackedTableCellHead>
-                        Children
-                    </StackedTableCellHead>
-                    <StackedTableCellHead>
-                        Last Active
-                    </StackedTableCellHead>
-                </StackedTableRowHead>
-            </StackedTableHead>
-            <StackedTableBody>
-                <StackedTableRow>
-                    <StackedTableCell>
-                      {orgunit.displayName}
-                    </StackedTableCell>
-                    <StackedTableCell>
-                          {userCount}
-                    </StackedTableCell>
-                    <StackedTableCell>
-                          {orgunit.children}
-                    </StackedTableCell>
-                    <StackedTableCell>
-                      { lastLogin }
-                    </StackedTableCell>
-                </StackedTableRow>
-            </StackedTableBody>
-        </StackedTable>
+      <StackedTable>
+          <StackedTableHead>
+              <StackedTableRowHead>
+                  <StackedTableCellHead>
+                      Selected Orgunits
+                  </StackedTableCellHead>
+                  <StackedTableCellHead>
+                      User Count
+                  </StackedTableCellHead>
+                  <StackedTableCellHead>
+                      Children
+                  </StackedTableCellHead>
+                  <StackedTableCellHead>
+                      Last Active
+                  </StackedTableCellHead>
+              </StackedTableRowHead>
+          </StackedTableHead>
+          <StackedTableBody>
+              <StackedTableRow>
+                  <StackedTableCell>
+                    {orgunit.displayName}
+                  </StackedTableCell>
+                  <StackedTableCell>
+                        {userCount}
+                  </StackedTableCell>
+                  <StackedTableCell>
+                        {orgunit.children}
+                  </StackedTableCell>
+                  <StackedTableCell>
+                    { lastLogin }
+                  </StackedTableCell>
+              </StackedTableRow>
+          </StackedTableBody>
+      </StackedTable>
     </div>
   );
 };

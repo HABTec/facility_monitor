@@ -8,7 +8,7 @@ const UsersQuery = {
   orgUnitUsers: ({ orgUnit}) => ({
     resource: `users`,
     params: {
-      fields: ["id","displayName","userCredentials[username,disabled,lastLogin]"],
+      fields: ["id","displayName","userRoles[id,displayName]","userCredentials[username,disabled,lastLogin]"],
       filter: [`organisationUnits.id:eq:${orgUnit?.id}`,`userCredentials.disabled:eq:false`],
       total: true,
       paging:true,
@@ -60,12 +60,50 @@ const DataElementRow = ({
 }) => {
 
   const [lastLogin,setLastLogin] = useState(null);
+  const [roles,setRoles] = useState([]);
+
+  
   const handelLoadComplete = (data)=>{
-        // count all the users
-        if(data?.orgUnits?.pager?.total>0){
-          setLastLogin(timeAgo(findLastLogin(data?.orgUnits?.users)?.getTime()));
+    // count all the users
+    if(data?.orgUnits?.pager?.total>0){
+      setLastLogin(timeAgo(findLastLogin(data?.orgUnits?.users)?.getTime()));
+    }
+    // Group users by role
+    let internal_roles = [];
+    
+    data?.orgUnits?.users?.forEach((async function(user){
+
+      user.userRoles.forEach((userRole)=>{
+        // check if the role already exists
+        let role = internal_roles.find(e=>e.id==userRole.id);
+
+        if(userRole.id=="UYXOT4A7JMI")
+          console.log(role,userRole,internal_roles,user,"###1");
+        
+        if(!role){
+          internal_roles.push({...userRole,users:[user],lastLogin:timeAgo(new Date(user.userCredentials?.lastLogin ?? 0)?.getTime())});
+        }else{
+          let index = internal_roles.indexOf(role);
+          role.users.push(user);
+          role.lastLogin=timeAgo(findLastLogin(role.users)?.getTime());
+          // internal_roles = [...(roles.filter(e=>e.id!=role.id)),role];
+          internal_roles.splice(index,1);
+          internal_roles.push(role);
         }
+
+       
+        if(userRole.id=="UYXOT4A7JMI")
+          console.log(role,internal_roles,"###2");
+
+      })
+    }));
+
+    console.log(internal_roles,"###6");
+
+    setRoles(internal_roles);
   }
+
+
 
   const { loading, error, data, refetch } = useDataQuery(
     {
@@ -76,14 +114,18 @@ const DataElementRow = ({
       onComplete: handelLoadComplete,
     }
   );
+  console.log(roles,"roles",data);
 
-  return (
+return (
     <>
         <DataTableRow key={orgunit?.id}>
-          <DataTableCell key={orgunit?.id + "1"}>
+          <DataTableCell key={orgunit?.id + "4"} colSpan={roles.count}>
             {orgunit.displayName}
           </DataTableCell>
-        <DataTableCell key={orgunit?.id + "2"}>
+          <DataTableCell key={orgunit?.id + "1"} >
+            all
+          </DataTableCell>
+          <DataTableCell key={orgunit?.id + "2"}>
           {loading ? <CircularLoader small /> :
               data?.orgUnits?.pager?.total
           }
@@ -92,6 +134,23 @@ const DataElementRow = ({
             { lastLogin }
           </DataTableCell>
         </DataTableRow>
+        {roles.map( role =>
+        <DataTableRow key={orgunit?.id+role.id}>
+          <DataTableCell key={orgunit?.id+role.id + "4"}>
+          </DataTableCell>
+          <DataTableCell key={orgunit?.id+role.id + "1"}>
+            {role.displayName}
+          </DataTableCell>
+          <DataTableCell key={orgunit?.id+role.id + "2"}>
+          {loading ? <CircularLoader small /> :
+              role.users.length
+          }
+          </DataTableCell>
+          <DataTableCell key={orgunit?.id +role.id + "3"}>
+            { role.lastLogin }
+          </DataTableCell>
+        </DataTableRow>
+        )}
     </>
   );
 };
