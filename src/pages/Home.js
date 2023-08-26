@@ -1,16 +1,17 @@
 import React from "react";
 import classes from "../App.module.css";
-import { OrganisationUnitTree,Pagination } from "@dhis2/ui";
+import { OrganisationUnitTree, Pagination } from "@dhis2/ui";
 import { useState, useEffect } from "react";
 import DataElementGroupSelect from "../components/DataElementGroupSelect.js";
 import PeroidSelect from "../components/PeriodSelect.js";
 import getCurrentDate from "../memo/getCurrentDate.js";
 import usePeriods from "../memo/usePeriod.js";
-import { spacers, spacersNum } from '@dhis2/ui';
+import { spacers, spacersNum, Tab, TabBar, Help } from "@dhis2/ui";
 
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import DataElementTable from "../components/DataElementTable";
 import OrgunitWidget from "../components/OrgunitWidget";
+import UserActivityTable from "../components/UserActivityTable";
 
 //const selectedDataElmentGroupQuery = {
 //  dataElements: {
@@ -27,14 +28,14 @@ import OrgunitWidget from "../components/OrgunitWidget";
 
 //query orgunits that blong to a dataset and are memeber of an org unit and only facilities
 const validOrgUnitsQuery = {
-  orgUnits: ({ orgUnit, pageSize, level, page}) => ({
+  orgUnits: ({ orgUnit, pageSize, level, page }) => ({
     resource: `organisationUnits`,
     params: {
-      fields: ["id","displayName"],
-      filter: [`path:like:${orgUnit}`,`level:eq:${level}`],
+      fields: ["id", "displayName"],
+      filter: [`path:like:${orgUnit}`, `level:eq:${level}`],
       total: true,
-      page:page,
-      pageSize:pageSize
+      page: page,
+      pageSize: pageSize,
     },
   }),
 };
@@ -60,8 +61,7 @@ const Home = (props) => {
   const [orgUnits, setOrgUnits] = useState([]);
   const [selectedDataElementGroup, setSelectedDataElementGroup] = useState();
 
-
-  const [dataValues,setDataValues]= useState([]);
+  const [dataValues, setDataValues] = useState([]);
   const [periodType, setPeriodtype] = useState("WEEKLY");
   const [dataSetId, setDataSetId] = useState();
   const [selectedPeriod, setSelectedPeriod] = useState();
@@ -70,9 +70,11 @@ const Home = (props) => {
   const [year, setYear] = useState(currentYear.getFullYear());
 
   const [pageSize, setPageSize] = useState(10);
-  const [page,setPage] = useState(1);
-  const [pageCount,setPageCount] = useState(1);
-  const [totalPages, setTotalPages] =useState(10);
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(1);
+  const [totalPages, setTotalPages] = useState(10);
+
+  const [showUserActivity, setShowUserActivity] = useState(false);
 
   const periods = usePeriods({
     periodType,
@@ -89,13 +91,15 @@ const Home = (props) => {
     setTotalPages(data?.orgUnits?.pager?.total ?? 10);
   };
 
-  const { loading, error, data, refetch } = useDataQuery(
-    validOrgUnitsQuery,
-    {
-      variables: { orgUnits,pageSize,page,level:selectedOrgUnit?.path?.split('/')?.length ?? 0},
-      onComplete: handelLoadComplete,
-    }
-  );
+  const { loading, error, data, refetch } = useDataQuery(validOrgUnitsQuery, {
+    variables: {
+      orgUnits,
+      pageSize,
+      page,
+      level: selectedOrgUnit?.path?.split("/")?.length ?? 0,
+    },
+    onComplete: handelLoadComplete,
+  });
 
   useEffect(() => {
     if (selectedOrgUnit)
@@ -105,12 +109,11 @@ const Home = (props) => {
             orgUnit: selectedOrgUnit?.id,
             pageSize,
             page,
-            level: selectedOrgUnit?.path?.split('/')?.length ?? 0
+            level: selectedOrgUnit?.path?.split("/")?.length ?? 0,
           }),
         })
         .then(handelLoadComplete);
-  }, [selectedOrgUnit?.id,page,pageSize]);
-
+  }, [selectedOrgUnit?.id, page, pageSize]);
 
   const handelPeriodChange = (period) => {
     setSelectedPeriod(period);
@@ -127,13 +130,17 @@ const Home = (props) => {
   };
 
   const onChange = (org) => {
+    console.log(org, "org log");
     let selected = [org.path];
-    setSelectedOrgUnits(selected);
-    setSelectedOrgUnit(org);
+    if (selectedOrgUnits.length > 0 && selectedOrgUnits[0]==org?.path) {
+      setSelectedOrgUnits([]);
+      setSelectedOrgUnit(null);
+    } else {
+      setSelectedOrgUnits(selected);
+      setSelectedOrgUnit(org);
+    }
     setPage(1);
   };
-
-  console.log(selectedOrgUnit);
 
   const roots = me?.organisationUnits?.map((org) => org?.id);
 
@@ -153,31 +160,54 @@ const Home = (props) => {
           ) : (
             <></>
           )}
-            { selectedOrgUnit?.id ?
-              <OrgunitWidget orgunit={selectedOrgUnit} ></OrgunitWidget>
-              :<></>
-            }
+          {selectedOrgUnit?.id ? (
+            <OrgunitWidget orgunit={selectedOrgUnit}></OrgunitWidget>
+          ) : (
+            <></>
+          )}
         </div>
         <div className={classes.container}>
+          <TabBar>
+            <Tab
+              onClick={() => {
+                setShowUserActivity(false);
+              }}
+              selected={!showUserActivity}
+            >
+              Facility Activity
+            </Tab>
+            <Tab
+              onClick={() => {
+                setShowUserActivity(true);
+              }}
+              selected={showUserActivity}
+            >
+              User Activity
+            </Tab>
+          </TabBar>
 
-          { selectedOrgUnit?.id ?<>
-          <DataElementTable
-            loading={loading}
-            orgunits={
-              orgUnits
-            }
-            selectedOrgUnit={selectedOrgUnit}
-          ></DataElementTable></>:<></>}
-            {pageCount>1?
-            <Pagination className={classes.pagination}
-                onPageChange={setPage}
-                onPageSizeChange={setPageSize}
+          {showUserActivity ? (
+            <UserActivityTable
+              selectedOrgUnit={selectedOrgUnit}
+            ></UserActivityTable>
+          ) : selectedOrgUnit?.id ? (
+            <>
+              <DataElementTable
+                loading={loading}
+                orgunits={orgUnits}
+                selectedOrgUnit={selectedOrgUnit}
+                setPage={setPage}
+                setPageSize={setPageSize}
                 page={page}
                 pageCount={pageCount}
                 pageSize={pageSize}
                 total={totalPages}
-            />:<></>}
-
+              ></DataElementTable>
+              
+            </>
+          ) : (
+            <Help>Please select an org unit on the left</Help>
+          )}
         </div>
       </div>
     </div>

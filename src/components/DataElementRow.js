@@ -8,7 +8,7 @@ const UsersQuery = {
   orgUnitUsers: ({ orgUnit}) => ({
     resource: `users`,
     params: {
-      fields: ["id","displayName","userRoles[id,displayName]","userCredentials[username,disabled,lastLogin]"],
+      fields: ["id","name","userRoles[id,displayName]","userCredentials[username,disabled,lastLogin]"],
       filter: [`organisationUnits.id:eq:${orgUnit?.id}`,`userCredentials.disabled:eq:false`],
       total: true,
       paging:true,
@@ -76,10 +76,6 @@ const DataElementRow = ({
       user.userRoles.forEach((userRole)=>{
         // check if the role already exists
         let role = internal_roles.find(e=>e.id==userRole.id);
-
-        if(userRole.id=="UYXOT4A7JMI")
-          console.log(role,userRole,internal_roles,user,"###1");
-        
         if(!role){
           internal_roles.push({...userRole,users:[user],lastLogin:timeAgo(new Date(user.userCredentials?.lastLogin ?? 0)?.getTime())});
         }else{
@@ -90,16 +86,8 @@ const DataElementRow = ({
           internal_roles.splice(index,1);
           internal_roles.push(role);
         }
-
-       
-        if(userRole.id=="UYXOT4A7JMI")
-          console.log(role,internal_roles,"###2");
-
       })
     }));
-
-    console.log(internal_roles,"###6");
-
     setRoles(internal_roles);
   }
 
@@ -114,7 +102,6 @@ const DataElementRow = ({
       onComplete: handelLoadComplete,
     }
   );
-  console.log(roles,"roles",data);
 
 return (
     <>

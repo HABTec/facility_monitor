@@ -1,6 +1,6 @@
 import React from "react";
 import classes from "../App.module.css";
-import { SingleSelectOption, SingleSelectField } from "@dhis2/ui";
+import { SingleSelectOption, SingleSelectField,Pagination } from "@dhis2/ui";
 import YearNavigator from "./YearNavigator.js";
 import DataElementRow from "../components/DataElementRow.js";
 import {
@@ -15,7 +15,7 @@ import {
   CircularLoader,
 } from "@dhis2/ui";
 
-const DataElementTable = ({ loading, orgunits, selectedOrgUnit}) => {
+const DataElementTable = ({ loading, orgunits, selectedOrgUnit, pageCount, pageSize, setPageSize, setPage,page, total}) => {
   const rows = orgunits?.map((element) => (
     <DataElementRow
       selectedOrgUnit={selectedOrgUnit}
@@ -35,7 +35,7 @@ const DataElementTable = ({ loading, orgunits, selectedOrgUnit}) => {
     >
       {loading ? (
         <CircularLoader small />
-      ) : (
+      ) : (<>
         <DataTable>
           <TableHead>
             <DataTableRow>
@@ -48,7 +48,20 @@ const DataElementTable = ({ loading, orgunits, selectedOrgUnit}) => {
           <TableBody>{rows}</TableBody>
 
         </DataTable>
-      )}
+        { pageCount > 1 ? (
+                <Pagination
+                  className={classes.pagination}
+                  onPageChange={setPage}
+                  onPageSizeChange={setPageSize}
+                  page={page}
+                  pageCount={pageCount}
+                  pageSize={pageSize}
+                  total={total}
+                />
+              ) : (
+                <></>
+              )}
+      </>)}
     </div>
   );
 };

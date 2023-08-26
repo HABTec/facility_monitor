@@ -14,6 +14,11 @@
     flex-direction: row;
 }
 
+.spaced {
+    margin-bottom:24px;
+    color:red;
+}
+
 
 .yearContainer {
     display: flex;
