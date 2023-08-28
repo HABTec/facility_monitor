@@ -81,18 +81,25 @@ const findLastLoginUser = (users) => {
     var user_login_date = new Date(user.userCredentials?.lastLogin ?? 0);
     if (maxPeriod == undefined) {
       maxPeriod = user_login_date;
-      userRet=user;
+      userRet = user;
     } else {
-      if (maxPeriod < user_login_date) {maxPeriod = user_login_date;userRet=user}
-      
+      if (maxPeriod < user_login_date) {
+        maxPeriod = user_login_date;
+        userRet = user;
+      }
     }
   });
   return userRet;
 };
 
-
-const DataElementRow = ({ orgunit, userActivityView }) => {
+const DataElementRow = ({
+  orgunit,
+  userActivityView,
+  showUserActivity,
+  selectedUser,
+}) => {
   const [lastLogin, setLastLogin] = useState(null);
+  const [lastLoginUser, setLastLoginUser] = useState(null);
   const [roles, setRoles] = useState([]);
   const [frequency, setFrequency] = useState(null);
 
@@ -104,6 +111,7 @@ const DataElementRow = ({ orgunit, userActivityView }) => {
     if (data?.orgUnits?.pager?.total > 0) {
       let lastUser = findLastLoginUser(data?.orgUnits?.users);
       setLastLogin(timeAgo(findLastLogin(data?.orgUnits?.users)?.getTime()));
+      setLastLoginUser(lastUser);
 
       // Group users by role
       let internal_roles = [];
@@ -119,13 +127,13 @@ const DataElementRow = ({ orgunit, userActivityView }) => {
               lastLogin: timeAgo(
                 new Date(user.userCredentials?.lastLogin ?? 0)?.getTime()
               ),
-              lastLoggedInUser:user
+              lastLoggedInUser: user,
             });
           } else {
             let index = internal_roles.indexOf(role);
             role.users.push(user);
             role.lastLogin = timeAgo(findLastLogin(role.users)?.getTime());
-            role.lastLoggedInUser=user;
+            role.lastLoggedInUser = user;
             // internal_roles = [...(roles.filter(e=>e.id!=role.id)),role];
             internal_roles.splice(index, 1);
             internal_roles.push(role);
@@ -144,11 +152,11 @@ const DataElementRow = ({ orgunit, userActivityView }) => {
       //     .then((data) => {
       //       internal_roles[i].frequency=data?.userActivityLog?.pager?.total;
       //     });
-        
+
       // }
 
       setRoles(internal_roles);
-      
+
       if (lastUser && userActivityView)
         engine
           .query({
@@ -173,35 +181,98 @@ const DataElementRow = ({ orgunit, userActivityView }) => {
     }
   );
 
+  const selectUser = (e) => {
+    if (lastLoginUser) {
+      showUserActivity(lastLoginUser);
+    }
+  };
+
   return (
     <>
-      <DataTableRow key={orgunit?.id}>
-        <DataTableCell key={orgunit?.id + "4"} colSpan={roles.count}>
+      <DataTableRow
+        key={orgunit?.id}
+        selected={
+          lastLoginUser
+            ? lastLoginUser?.username == selectedUser?.username
+            : false
+        }
+      >
+        <DataTableCell
+          key={orgunit?.id + "4"}
+          colSpan={roles.count}
+          onClick={selectUser}
+        >
           {orgunit.displayName}
         </DataTableCell>
-        <DataTableCell key={orgunit?.id + "1"}>all</DataTableCell>
-        <DataTableCell key={orgunit?.id + "2"}>
+        <DataTableCell key={orgunit?.id + "1"} onClick={selectUser}>
+          all
+        </DataTableCell>
+        <DataTableCell key={orgunit?.id + "2"} onClick={selectUser}>
           {loading ? <CircularLoader small /> : data?.orgUnits?.pager?.total}
         </DataTableCell>
-        <DataTableCell key={orgunit?.id + "3"}>{lastLogin}</DataTableCell>
+        <DataTableCell key={orgunit?.id + "3"} onClick={selectUser}>
+          {lastLogin}
+        </DataTableCell>
 
-        <DataTableCell key={orgunit?.id + "5"}>
-            {frequency}
-          </DataTableCell>
+        <DataTableCell key={orgunit?.id + "5"} onClick={selectUser}>
+          {frequency}
+        </DataTableCell>
       </DataTableRow>
       {roles.map((role) => (
-        <DataTableRow key={orgunit?.id + role.id}>
-          <DataTableCell key={orgunit?.id + role.id + "4"}></DataTableCell>
-          <DataTableCell key={orgunit?.id + role.id + "1"}>
+        <DataTableRow
+          key={orgunit?.id + role.id}
+          selected={
+            role.lastLoggedInUser
+              ? role.lastLoggedInUser?.username == selectedUser?.username
+              : false
+          }
+        >
+          <DataTableCell
+            key={orgunit?.id + role.id + "4"}
+            onClick={() => {
+              if (role?.lastLoggedInUser) {
+                showUserActivity(role?.lastLoggedInUser);
+              }
+            }}
+          ></DataTableCell>
+          <DataTableCell
+            key={orgunit?.id + role.id + "1"}
+            onClick={() => {
+              if (role?.lastLoggedInUser) {
+                showUserActivity(role?.lastLoggedInUser);
+              }
+            }}
+          >
             {role.displayName}
           </DataTableCell>
-          <DataTableCell key={orgunit?.id + role.id + "2"}>
+          <DataTableCell
+            key={orgunit?.id + role.id + "2"}
+            onClick={() => {
+              if (role?.lastLoggedInUser) {
+                showUserActivity(role?.lastLoggedInUser);
+              }
+            }}
+          >
             {loading ? <CircularLoader small /> : role.users.length}
           </DataTableCell>
-          <DataTableCell key={orgunit?.id + role.id + "3"}>
+          <DataTableCell
+            key={orgunit?.id + role.id + "3"}
+            onClick={() => {
+              if (role?.lastLoggedInUser) {
+                showUserActivity(role?.lastLoggedInUser);
+              }
+            }}
+          >
             {role.lastLogin}
           </DataTableCell>
-          <DataTableCell key={orgunit?.id + role.id + "5"}>
+          <DataTableCell
+            key={orgunit?.id + role.id + "5"}
+            onClick={() => {
+              if (role?.lastLoggedInUser) {
+                showUserActivity(role?.lastLoggedInUser);
+              }
+            }}
+          >
             {role.frequency}
           </DataTableCell>
         </DataTableRow>

@@ -3,6 +3,8 @@ import classes from "../App.module.css";
 import { SingleSelectOption, SingleSelectField, Pagination } from "@dhis2/ui";
 import YearNavigator from "./YearNavigator.js";
 import DataElementRow from "../components/DataElementRow.js";
+import UserActivityChart from "../components/UserActivityChart";
+import {useState} from "react"
 import {
   DataTable,
   TableHead,
@@ -13,7 +15,7 @@ import {
   TableFoot,
   spacers,
   CircularLoader,
-  Tooltip,
+  Tooltip,Card
 } from "@dhis2/ui";
 
 const DataElementTable = ({
@@ -28,16 +30,21 @@ const DataElementTable = ({
   total,
   userActivityView,
 }) => {
+  
+  const [selectedUser, setSelectedUser] = useState();
+
   const rows = orgunits?.map((element) => (
     <DataElementRow
       selectedOrgUnit={selectedOrgUnit}
       orgunit={element}
       key={element?.id}
       userActivityView={userActivityView}
+      showUserActivity={setSelectedUser}
+      selectedUser={selectedUser}
     ></DataElementRow>
   ));
 
-  return (<div       style={{
+  return (<div style={{
         display: 'flex',
         marginRight: "2%",
       }}>
@@ -85,9 +92,13 @@ const DataElementTable = ({
       <div style={{
           marginTop: spacers.dp24,
           marginRight: "2%",
-          minWidth: spacers.dp384,
+          minWidth: "50%",
           maxWidth: "50%"
         }}>
+          {selectedUser?
+          <UserActivityChart userActivityView={userActivityView} user={selectedUser}></UserActivityChart>:
+            <></>
+          }
         </div>
     </div>
   );
