@@ -69,8 +69,6 @@ const UserActivityChart = ({ user, userActivityView }) => {
       },
     });
 
-
-
   };
 
 
@@ -90,8 +88,17 @@ useEffect(()=>{
     responsive: true,
     scales: {
       y: {
-          beginAtZero: true,display:true,
-          labelString:'test',
+          beginAtZero: true,
+          title:{
+          display:true,
+          text:'Number of Activities',
+        }
+      },
+      x:{
+        title:{
+          display:true,
+          text:'Day of Month',
+        }
       }
     },
     plugins: {
