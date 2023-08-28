@@ -52,6 +52,15 @@ const validOrgUnitsQuery = {
 //    },
 //  })
 //};
+// sqlViews?filter=displayName:like:userActivity
+const userActivityViewQuery = {userActivityView:{
+  resource: `sqlViews`,
+  params: {
+    fields: ["id", "displayName"],
+    filter: [`displayName:eq:userActivity`],
+    paging:false,
+  },
+}};
 
 const Home = (props) => {
   const { me, maxOrgUnitLevels } = props;
@@ -90,6 +99,17 @@ const Home = (props) => {
     setPageSize(data?.orgUnits?.pager?.pageSize ?? 10);
     setTotalPages(data?.orgUnits?.pager?.total ?? 10);
   };
+
+  const [userActivityView,setUserActivityView] = useState(null);
+  useDataQuery(userActivityViewQuery,{onComplete:(data)=>{
+    if(data?.userActivityView?.sqlViews.length>0)
+      setUserActivityView(data?.userActivityView?.sqlViews[0].id)
+    else{
+      alert("Error: create an sql view with name: userActivity, type:query and SQL: SELECT username,eventtype,extract(day from timestamp) as day,count(*) from datastatisticsevent where age(now(),timestamp) < '1 months'::interval and  username = '${username}' GROUP BY username,eventtype,extract(day from timestamp) ");
+    }
+  }});
+
+  // console.log(engine.query(userActivityViewQuery).then(console.log));
 
   const { loading, error, data, refetch } = useDataQuery(validOrgUnitsQuery, {
     variables: {
@@ -130,7 +150,6 @@ const Home = (props) => {
   };
 
   const onChange = (org) => {
-    console.log(org, "org log");
     let selected = [org.path];
     if (selectedOrgUnits.length > 0 && selectedOrgUnits[0]==org?.path) {
       setSelectedOrgUnits([]);
@@ -202,6 +221,7 @@ const Home = (props) => {
                 pageCount={pageCount}
                 pageSize={pageSize}
                 total={totalPages}
+                userActivityView={userActivityView}
               ></DataElementTable>
               
             </>
