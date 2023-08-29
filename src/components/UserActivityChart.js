@@ -78,7 +78,7 @@ useEffect(()=>{
     .query({
       userActivityLog: userActivityLog.userActivity({
         id: userActivityView,
-        username: user?.username,
+        username: user?.userCredentials?.username,
       }),
     })
     .then(handelLoadComplete);

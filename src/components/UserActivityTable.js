@@ -94,7 +94,7 @@ const UserActivityTable = ({ loading, orgunits, selectedOrgUnit }) => {
   const rows = users?.map((el) => (
     <DataTableRow key={el?.id}>
       <DataTableCell key={el?.id + "4"}>{el.name}</DataTableCell>
-      <DataTableCell key={el?.id + "1"}>{el.username}</DataTableCell>
+      <DataTableCell key={el?.id + "1"}>{el?.userCredentials?.username}</DataTableCell>
       <DataTableCell key={el?.id + "2"}>{el.phoneNumber}</DataTableCell>
       <DataTableCell key={el?.id + "5"}>
         {el.userRoles?.map((role) => (

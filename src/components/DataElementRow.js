@@ -8,11 +8,7 @@ const UsersQuery = {
     resource: `users`,
     params: {
       fields: [
-        "id",
-        "name",
-        "username",
-        "userRoles[id,displayName]",
-        "userCredentials[username,disabled,lastLogin]",
+        "id,name,userCredentials[username,disabled,lastLogin,userRoles[id,displayName]]",
       ],
       filter: [
         `organisationUnits.id:eq:${orgUnit?.id}`,
@@ -95,7 +91,7 @@ const DataElementRow = ({
       let internal_roles = [];
 
       data?.orgUnits?.users?.forEach(async function (user) {
-        user.userRoles.forEach((userRole) => {
+        user?.userCredentials?.userRoles.forEach((userRole) => {
           // check if the role already exists
           let role = internal_roles.find((e) => e.id == userRole.id);
           if (!role) {
@@ -139,7 +135,7 @@ const DataElementRow = ({
           .query({
             userActivityLog: userActivityLog.userActivity({
               id: userActivityView,
-              username: lastUser.username,
+              username: lastUser?.userCredentials?.username,
             }),
           })
           .then((data) => {
@@ -170,7 +166,7 @@ const DataElementRow = ({
         key={orgunit?.id}
         selected={
           lastLoginUser
-            ? lastLoginUser?.username == selectedUser?.username
+            ? lastLoginUser?.userCredentials?.username == selectedUser?.userCredentials?.username
             : false
         }
       >
@@ -200,7 +196,7 @@ const DataElementRow = ({
           key={orgunit?.id + role.id}
           selected={
             role.lastLoggedInUser
-              ? role.lastLoggedInUser?.username == selectedUser?.username
+              ? role.lastLoggedInUser?.userCredentials?.username == selectedUser?.userCredentials?.username
               : false
           }
         >

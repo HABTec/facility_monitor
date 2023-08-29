@@ -12,7 +12,6 @@ import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import DataElementTable from "../components/DataElementTable";
 import OrgunitWidget from "../components/OrgunitWidget";
 import UserActivityTable from "../components/UserActivityTable";
-import UserActivityChart from "../components/UserActivityChart";
 //const selectedDataElmentGroupQuery = {
 //  dataElements: {
 //    resource: "dataElementGroups",
