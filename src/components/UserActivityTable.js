@@ -34,12 +34,7 @@ const UsersQuery = {
       resource: `users`,
       params: {
         fields: [
-          "id",
-          "name",
-          "username",
-          "phoneNumber",
-          "userCredentials[username,disabled,lastLogin]",
-          "userRoles[id,displayName]",
+          "id,name,username,phoneNumber,userCredentials[username,disabled,lastLogin],userRoles[id,displayName]",
         ],
         filter,
         total: true,
