@@ -1,5 +1,12 @@
 import React from "react";
-import { DataTableRow, DataTableCell, CircularLoader, Card } from "@dhis2/ui";
+import {
+  DataTableRow,
+  DataTableCell,
+  CircularLoader,
+  Card,
+  Help,
+  Chip,
+} from "@dhis2/ui";
 import { useState, useEffect } from "react";
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import { Line } from "react-chartjs-2";
@@ -44,16 +51,17 @@ const UserActivityChart = ({ user, userActivityView }) => {
   const [state, setState] = useState();
 
   const handelLoadComplete = (data) => {
-    
-    let daysInMonth = Array.from({ length: moment().daysInMonth() }, (x, i) => i+1);
+    let daysInMonth = Array.from(
+      { length: moment().daysInMonth() },
+      (x, i) => i + 1
+    );
     let line_data = Array.from(daysInMonth, (x, i) => 0);
     let rows = data?.userActivityLog?.listGrid?.rows;
     for (let i = 0; i < rows?.length; i++) {
-      line_data[parseInt(rows[i][2])]=parseInt(rows[i][3]);      
+      line_data[parseInt(rows[i][2])] = parseInt(rows[i][3]);
     }
 
-
-    console.log(data,line_data);
+    console.log(data, line_data);
 
     setState({
       data: {
@@ -62,44 +70,42 @@ const UserActivityChart = ({ user, userActivityView }) => {
           {
             data: line_data,
             fill: true,
-            borderColor: 'rgb(0, 105, 92)',
-            tension: 0.2
+            borderColor: "rgb(0, 105, 92)",
+            tension: 0.2,
           },
         ],
       },
     });
-
   };
 
-
-useEffect(()=>{
-  if(user)
-    engine
-    .query({
-      userActivityLog: userActivityLog.userActivity({
-        id: userActivityView,
-        username: user?.userCredentials?.username,
-      }),
-    })
-    .then(handelLoadComplete);
-},[user]);
+  useEffect(() => {
+    if (user)
+      engine
+        .query({
+          userActivityLog: userActivityLog.userActivity({
+            id: userActivityView,
+            username: user?.userCredentials?.username,
+          }),
+        })
+        .then(handelLoadComplete);
+  }, [user]);
 
   const options = {
     responsive: true,
     scales: {
       y: {
-          beginAtZero: true,
-          title:{
-          display:true,
-          text:'Number of Activities',
-        }
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: "Number of Activities",
+        },
       },
-      x:{
-        title:{
-          display:true,
-          text:'Day of Month',
-        }
-      }
+      x: {
+        title: {
+          display: true,
+          text: "Day of Month",
+        },
+      },
     },
     plugins: {
       legend: {
@@ -112,16 +118,50 @@ useEffect(()=>{
       },
     },
   };
-
+  console.log(user);
   return (
-    <div> {state? 
-      <Card>
-        <div style={{ padding: "2%" }}>
-          <Line type="line" data={state.data} options={options} />
-        </div>
-      </Card>
-       : <></>
-       }
+    <div>
+      {" "}
+      {state ? (
+        <>
+          <Card>
+            <div style={{ padding: "2%" }}>
+              <Line type="line" data={state.data} options={options} />
+            </div>
+          </Card>
+          {user ? (
+            <Card>
+              <div style={{ padding: "2%" }}>
+                <Help>
+                  <div style={{ display: "inline-block", padding: "8px" }}>
+                    <b>Name</b>: {user.name}
+                  </div>
+                  <div style={{ display: "inline-block", padding: "8px" }}>
+                    <b>Id</b>: {user.id}
+                  </div>
+                  <div style={{ display: "inline-block", padding: "8px" }}>
+                    <b>Username</b>: {user.userCredentials?.username}
+                  </div>
+                  <div style={{ display: "inline-block", padding: "8px" }}>
+                    <b>lastLogin</b>: {user.userCredentials?.lastLogin}
+                  </div>
+
+                  <div style={{ display: "inline-block", padding: "8px" }}>
+                    <b>Roles</b>{" "}
+                    {user.userCredentials?.userRoles?.map((role) => (
+                      <Chip dense>{role.displayName}</Chip>
+                    ))}
+                  </div>
+                </Help>
+              </div>
+            </Card>
+          ) : (
+            <></>
+          )}
+        </>
+      ) : (
+        <></>
+      )}
     </div>
   );
 };

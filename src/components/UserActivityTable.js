@@ -34,7 +34,7 @@ const UsersQuery = {
       resource: `users`,
       params: {
         fields: [
-          "id,name,username,phoneNumber,userCredentials[username,disabled,lastLogin],userRoles[id,displayName]",
+          "id,name,phoneNumber,userCredentials[username,disabled,lastLogin,userRoles[id,displayName]]",
         ],
         filter,
         total: true,
@@ -92,7 +92,7 @@ const UserActivityTable = ({ loading, orgunits, selectedOrgUnit }) => {
       <DataTableCell key={el?.id + "1"}>{el?.userCredentials?.username}</DataTableCell>
       <DataTableCell key={el?.id + "2"}>{el.phoneNumber}</DataTableCell>
       <DataTableCell key={el?.id + "5"}>
-        {el.userRoles?.map((role) => (
+        {el.userCredentials?.userRoles?.map((role) => (
           <Chip dense>{role.displayName}</Chip>
         ))}
       </DataTableCell>
