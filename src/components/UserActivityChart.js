@@ -9,8 +9,7 @@ import {
 } from "@dhis2/ui";
 import { useState, useEffect } from "react";
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
-import { Line } from "react-chartjs-2";
-// import Chart from 'chart.js/auto';
+import { Line, Bar } from "react-chartjs-2";
 import moment from "moment";
 
 import {
@@ -21,6 +20,7 @@ import {
   LineElement,
   Title,
   Tooltip,
+  BarElement,
   Legend,
 } from "chart.js";
 
@@ -29,6 +29,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend
@@ -46,7 +47,7 @@ const userActivityLog = {
   }),
 };
 
-const UserActivityChart = ({ user, userActivityView }) => {
+const UserActivityChart = ({ user, userActivityView, roles }) => {
   const engine = useDataEngine();
   const [state, setState] = useState();
 
@@ -60,8 +61,6 @@ const UserActivityChart = ({ user, userActivityView }) => {
     for (let i = 0; i < rows?.length; i++) {
       line_data[parseInt(rows[i][2])] = parseInt(rows[i][3]);
     }
-
-    console.log(data, line_data);
 
     setState({
       data: {
@@ -118,10 +117,50 @@ const UserActivityChart = ({ user, userActivityView }) => {
       },
     },
   };
-  console.log(user);
+
+  const optionsRoles = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: "Number of Users",
+        },
+      },
+      x: {
+        title: {
+          display: true,
+          text: "Role",
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        position: "bottom",
+        display: false,
+      },
+      title: {
+        display: true,
+        text: "Role Distribution",
+      },
+    },
+  };
+
+  const dataRoles = {
+    labels: roles.map((role) => role.displayName),
+    datasets: [
+      {
+        data: roles.map((role) => role.users.length),
+        fill: true,
+        borderColor: "rgb(0, 105, 92)",
+        tension: 0.2,
+      },
+    ],
+  };
+
   return (
     <div>
-      {" "}
       {state ? (
         <>
           <Card>
@@ -129,6 +168,13 @@ const UserActivityChart = ({ user, userActivityView }) => {
               <Line type="line" data={state.data} options={options} />
             </div>
           </Card>
+
+          <Card>
+            <div style={{ padding: "2%" }}>
+              <Bar options={optionsRoles} data={dataRoles} />
+            </div>
+          </Card>
+
           {user ? (
             <Card>
               <div style={{ padding: "2%" }}>

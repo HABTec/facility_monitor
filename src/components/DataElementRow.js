@@ -70,7 +70,7 @@ const DataElementRow = ({
   orgunit,
   userActivityView,
   showUserActivity,
-  selectedUser,
+  selectedUser,showRolesChart
 }) => {
   const [lastLogin, setLastLogin] = useState(null);
   const [lastLoginUser, setLastLoginUser] = useState(null);
@@ -158,6 +158,9 @@ const DataElementRow = ({
     if (lastLoginUser) {
       showUserActivity(lastLoginUser);
     }
+    if(roles?.length>0){
+      showRolesChart(roles);
+    }
   };
 
   return (
@@ -178,7 +181,7 @@ const DataElementRow = ({
           {orgunit.displayName}
         </DataTableCell>
         <DataTableCell key={orgunit?.id + "1"} onClick={selectUser}>
-          all
+          *
         </DataTableCell>
         <DataTableCell key={orgunit?.id + "2"} onClick={selectUser}>
           {loading ? <CircularLoader small /> : data?.orgUnits?.pager?.total}
@@ -206,6 +209,10 @@ const DataElementRow = ({
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
               }
+              if(roles?.length>0){
+                showRolesChart(roles);
+              }
+              
             }}
           ></DataTableCell>
           <DataTableCell
@@ -213,6 +220,9 @@ const DataElementRow = ({
             onClick={() => {
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
+              }
+              if(roles?.length>0){
+                showRolesChart(roles);
               }
             }}
           >
@@ -224,6 +234,9 @@ const DataElementRow = ({
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
               }
+              if(roles?.length>0){
+                showRolesChart(roles);
+              }
             }}
           >
             {loading ? <CircularLoader small /> : role.users.length}
@@ -234,6 +247,9 @@ const DataElementRow = ({
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
               }
+              if(roles?.length>0){
+                showRolesChart(roles);
+              }
             }}
           >
             {role.lastLogin}
@@ -243,6 +259,9 @@ const DataElementRow = ({
             onClick={() => {
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
+              }
+              if(roles?.length>0){
+                showRolesChart(roles);
               }
             }}
           >

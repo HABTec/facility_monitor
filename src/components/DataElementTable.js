@@ -15,7 +15,7 @@ import {
   TableFoot,
   spacers,
   CircularLoader,
-  Tooltip,Card
+  Tooltip,Card, 
 } from "@dhis2/ui";
 
 const DataElementTable = ({
@@ -32,6 +32,7 @@ const DataElementTable = ({
 }) => {
   
   const [selectedUser, setSelectedUser] = useState();
+  const [showRolesBarChart,setShowRolesBarChart]= useState();
 
   const rows = orgunits?.map((element) => (
     <DataElementRow
@@ -41,6 +42,7 @@ const DataElementTable = ({
       userActivityView={userActivityView}
       showUserActivity={setSelectedUser}
       selectedUser={selectedUser}
+      showRolesChart={setShowRolesBarChart}
     ></DataElementRow>
   ));
 
@@ -96,7 +98,7 @@ const DataElementTable = ({
           maxWidth: "50%"
         }}>
           {selectedUser?
-          <UserActivityChart userActivityView={userActivityView} user={selectedUser}></UserActivityChart>:
+          <UserActivityChart userActivityView={userActivityView} user={selectedUser} roles={showRolesBarChart}></UserActivityChart>:
             <></>
           }
         </div>
