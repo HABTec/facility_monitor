@@ -29,6 +29,7 @@ const DataElementTable = ({
   page,
   total,
   userActivityView,
+  userActivityCountView
 }) => {
   
   const [selectedUser, setSelectedUser] = useState();
@@ -40,6 +41,7 @@ const DataElementTable = ({
       orgunit={element}
       key={element?.id}
       userActivityView={userActivityView}
+      userActivityCountView={userActivityCountView}
       showUserActivity={setSelectedUser}
       selectedUser={selectedUser}
       showRolesChart={setShowRolesBarChart}
