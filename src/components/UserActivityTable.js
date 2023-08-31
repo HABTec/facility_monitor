@@ -1,38 +1,67 @@
 import React from "react";
 import classes from "../App.module.css";
-import { SingleSelectOption, SingleSelectField, Switch } from "@dhis2/ui";
 import YearNavigator from "./YearNavigator.js";
 import DataElementRow from "./DataElementRow.js";
 import { useState, useEffect } from "react";
 import {
   DataTable,
-  TableHead,
-  DataTableRow,
-  DataTableColumnHeader,
-  TableBody,
-  DataTableCell,
-  TableFoot,
   spacers,
   CircularLoader,
   Help,
   Pagination,
   Chip,
+  Switch,
+  TableHead,
+  DataTableColumnHeader,
+  DataTableCell,
+  TableFoot,
+  Table,
+  DataTableRow,DataTableBody
 } from "@dhis2/ui";
 
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import moment from "moment";
 
+// const UsersQuery = {
+//   InactiveUsers: ({ orgUnit, includeDisabled, page, pageSize, lastYear }) => {
+//     let filter = [`userCredentials.lastLogin:lt:${lastYear.toISOString()}`];
+//     if (orgUnit) filter.push(`organisationUnits.id:eq:${orgUnit}`);
+
+//     if (!includeDisabled)
+//       filter.push(`userCredentials.disabled:eq:${includeDisabled}`);
+
+//     return {
+//       resource: `users`,
+//       params: {
+//         fields: [
+//           "id,name,phoneNumber,userCredentials[username,disabled,lastLogin,userRoles[id,displayName]]",
+//         ],
+//         filter,
+//         total: true,
+//         paging: true,
+//         page: page,
+//         pageSize: pageSize,
+//         includeChildren: true,
+//       },
+//     };
+//   },
+// };
+
+const timeAgo = (prevDate) => {
+  return moment(prevDate).fromNow();
+};
+
 const UsersQuery = {
-  InactiveUsers: ({ orgUnit, includeDisabled, page, pageSize, lastYear }) => {
-    let filter = [`userCredentials.lastLogin:lt:${lastYear.toISOString()}`];
-    if (orgUnit) filter.push(`organisationUnits.id:eq:${orgUnit}`);
+  InactiveUsers: {
+    resource: `users`,
+    params: ({ orgUnit, includeDisabled, page, pageSize, lastYear }) => {
+      let filter = [`userCredentials.lastLogin:lt:${lastYear.toISOString()}`];
+      if (orgUnit) filter.push(`organisationUnits.id:eq:${orgUnit}`);
 
-    if (!includeDisabled)
-      filter.push(`userCredentials.disabled:eq:${includeDisabled}`);
+      if (!includeDisabled)
+        filter.push(`userCredentials.disabled:eq:${includeDisabled}`);
 
-    return {
-      resource: `users`,
-      params: {
+      return {
         fields: [
           "id,name,phoneNumber,userCredentials[username,disabled,lastLogin,userRoles[id,displayName]]",
         ],
@@ -42,16 +71,11 @@ const UsersQuery = {
         page: page,
         pageSize: pageSize,
         includeChildren: true,
-      },
-    };
+      };
+    },
   },
 };
-
-const timeAgo = (prevDate) => {
-  return moment(prevDate).fromNow();  
-};
-
-const UserActivityTable = ({ loading, orgunits, selectedOrgUnit }) => {
+const UserActivityTable = ({ selectedOrgUnit }) => {
   const lastYear = new Date();
   lastYear.setFullYear(lastYear.getFullYear() - 1);
 
@@ -65,6 +89,7 @@ const UserActivityTable = ({ loading, orgunits, selectedOrgUnit }) => {
   const engine = useDataEngine();
 
   const handelLoadComplete = (data) => {
+    // console.log(data, "data log");
     setPageCount(data?.InactiveUsers?.pager?.pageCount ?? 1);
     setPageUser(data?.InactiveUsers?.pager?.page ?? 1);
     setPageSize(data?.InactiveUsers?.pager?.pageSize ?? 10);
@@ -72,16 +97,26 @@ const UserActivityTable = ({ loading, orgunits, selectedOrgUnit }) => {
     setUsers(data?.InactiveUsers?.users);
   };
 
+
+  const userquery = useDataQuery(UsersQuery, {
+    variables: {
+      orgUnit: selectedOrgUnit?.id ?? null,
+      includeDisabled,
+      pageSize,
+      page: pageUser,
+      lastYear,
+    },
+    onComplete: handelLoadComplete,
+  });
+
   useEffect(() => {
-    engine
-      .query({
-        InactiveUsers: UsersQuery.InactiveUsers({
-          orgUnit: selectedOrgUnit?.id ?? null,
-          includeDisabled,
-          pageSize,
-          page: pageUser,
-          lastYear,
-        }),
+    let log = userquery
+      .refetch({
+        orgUnit: selectedOrgUnit?.id ?? null,
+        includeDisabled,
+        pageSize,
+        page: pageUser,
+        lastYear,
       })
       .then(handelLoadComplete);
   }, [selectedOrgUnit?.id, includeDisabled, pageUser, pageSize]);
@@ -89,11 +124,15 @@ const UserActivityTable = ({ loading, orgunits, selectedOrgUnit }) => {
   const rows = users?.map((el) => (
     <DataTableRow key={el?.id}>
       <DataTableCell key={el?.id + "4"}>{el.name}</DataTableCell>
-      <DataTableCell key={el?.id + "1"}>{el?.userCredentials?.username}</DataTableCell>
+      <DataTableCell key={el?.id + "1"}>
+        {el?.userCredentials?.username}
+      </DataTableCell>
       <DataTableCell key={el?.id + "2"}>{el.phoneNumber}</DataTableCell>
       <DataTableCell key={el?.id + "5"}>
         {el.userCredentials?.userRoles?.map((role) => (
-          <Chip dense>{role.displayName}</Chip>
+          <Chip key={role.id} dense>
+            {role.displayName}
+          </Chip>
         ))}
       </DataTableCell>
       <DataTableCell key={el?.id + "3"}>
@@ -101,6 +140,8 @@ const UserActivityTable = ({ loading, orgunits, selectedOrgUnit }) => {
       </DataTableCell>
     </DataTableRow>
   ));
+
+  console.log(userquery, pageUser);
 
   return (
     <div
@@ -116,7 +157,7 @@ const UserActivityTable = ({ loading, orgunits, selectedOrgUnit }) => {
       <Switch
         checked={includeDisabled}
         label="Include disabled accounts"
-        name="Include disabled accounts "
+        name="Include disabled accounts"
         onChange={(e) => {
           setIncludeDisabled(e.checked);
         }}
@@ -133,8 +174,9 @@ const UserActivityTable = ({ loading, orgunits, selectedOrgUnit }) => {
             <DataTableColumnHeader>Last Active</DataTableColumnHeader>
           </DataTableRow>
         </TableHead>
-        <TableBody>{rows}</TableBody>
+        <DataTableBody loading={userquery.loading}> {rows}</DataTableBody>
       </DataTable>
+
       <Pagination
         className={classes.pagination}
         onPageChange={setPageUser}
