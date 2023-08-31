@@ -92,7 +92,7 @@ const DataElementRow = ({
       // Group users by role
       let internal_roles = [];
 
-      data?.orgUnits?.users?.forEach(async function (user) {
+      data?.orgUnits?.users?.forEach(function (user) {
         user?.userCredentials?.userRoles.forEach((userRole) => {
           // check if the role already exists
           let role = internal_roles.find((e) => e.id == userRole.id);
@@ -108,8 +108,9 @@ const DataElementRow = ({
           } else {
             let index = internal_roles.indexOf(role);
             role.users.push(user);
+            let lastLoggedUser = findLastLoginUser(role.users);
             role.lastLogin = timeAgo(findLastLogin(role.users)?.getTime());
-            role.lastLoggedInUser = user;
+            role.lastLoggedInUser = lastLoggedUser;
             // internal_roles = [...(roles.filter(e=>e.id!=role.id)),role];
             internal_roles.splice(index, 1);
             internal_roles.push(role);
@@ -247,6 +248,7 @@ const DataElementRow = ({
           <DataTableCell
             key={orgunit?.id + role.id + "3"}
             onClick={() => {
+              console.log(role,"here")
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
               }
