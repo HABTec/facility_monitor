@@ -52,14 +52,16 @@ const validOrgUnitsQuery = {
 //  })
 //};
 // sqlViews?filter=displayName:like:userActivity
-const userActivityViewQuery = {userActivityView:{
-  resource: `sqlViews`,
-  params: {
-    fields: ["id", "displayName"],
-    filter: [`displayName:eq:userActivity`],
-    paging:false,
+const userActivityViewQuery = {
+  userActivityView: {
+    resource: `sqlViews`,
+    params: {
+      fields: ["id", "displayName"],
+      filter: [`displayName:in:[userActivity,userActivityCount]`],
+      paging: false,
+    },
   },
-}};
+};
 
 const Home = (props) => {
   const { me, maxOrgUnitLevels } = props;
@@ -99,16 +101,25 @@ const Home = (props) => {
     setTotalPages(data?.orgUnits?.pager?.total ?? 10);
   };
 
-  const [userActivityView,setUserActivityView] = useState(null);
-  useDataQuery(userActivityViewQuery,{onComplete:(data)=>{
-    if(data?.userActivityView?.sqlViews.length>0)
-      setUserActivityView(data?.userActivityView?.sqlViews[0].id)
-    else{
-      alert("Error: create an sql view with name: userActivity, type:query and SQL: SELECT username,eventtype,extract(day from timestamp) as day,count(*) from datastatisticsevent where age(now(),timestamp) < '1 months'::interval and  username = '${username}' GROUP BY username,eventtype,extract(day from timestamp) ");
-    }
-  }});
+  const [userActivityView, setUserActivityView] = useState(null);
+  const [userActivityCountView, setUserActivityCountView] = useState(null);
+  useDataQuery(userActivityViewQuery, {
+    onComplete: (data) => {
+      if (data?.userActivityView?.sqlViews.length > 0){
+        
+        let userActivityArray = data?.userActivityView?.sqlViews.filter((e)=>e.displayName=="userActivity");
+        let userActivityCountArray = data?.userActivityView?.sqlViews.filter((e)=>e.displayName=="userActivityCount");
 
-  // console.log(engine.query(userActivityViewQuery).then(console.log));
+        if(userActivityArray.length>0 || userActivityCountArray.length >0){
+          setUserActivityView(userActivityArray[0].id);
+          setUserActivityCountView(userActivityCountArray[0].id);
+        }else
+          alert("Error: create two sql views with name: userActivity and userActivityCount, type:query and SQL: SELECT username,eventtype,extract(day from timestamp) as day,count(*) from datastatisticsevent where age(now(),timestamp) < '1 months'::interval and  username = '${username}' GROUP BY username,eventtype,extract(day from timestamp) userActivityCount's SQL must be SELECT username, eventtype, extract( day from timestamp ) as day,  count(*) from datastatisticsevent where  age(now(), timestamp) < '1 months' :: interval and username = '${username}' GROUP BY username, eventtype, extract( day  from timestamp ) ");
+    } else {
+        alert("Error: create two sql views with name: userActivity and userActivityCount, type:query and SQL: SELECT username,eventtype,extract(day from timestamp) as day,count(*) from datastatisticsevent where age(now(),timestamp) < '1 months'::interval and  username = '${username}' GROUP BY username,eventtype,extract(day from timestamp) userActivityCount's SQL must be SELECT username, eventtype, extract( day from timestamp ) as day,  count(*) from datastatisticsevent where  age(now(), timestamp) < '1 months' :: interval and username = '${username}' GROUP BY username, eventtype, extract( day  from timestamp ) ");
+      }
+    },
+  });
 
   const { loading, error, data, refetch } = useDataQuery(validOrgUnitsQuery, {
     variables: {
@@ -150,7 +161,7 @@ const Home = (props) => {
 
   const onChange = (org) => {
     let selected = [org.path];
-    if (selectedOrgUnits.length > 0 && selectedOrgUnits[0]==org?.path) {
+    if (selectedOrgUnits.length > 0 && selectedOrgUnits[0] == org?.path) {
       setSelectedOrgUnits([]);
       setSelectedOrgUnit(null);
     } else {
@@ -221,8 +232,8 @@ const Home = (props) => {
                 pageSize={pageSize}
                 total={totalPages}
                 userActivityView={userActivityView}
+                userActivityCountView = {userActivityCountView}
               ></DataElementTable>
-              
             </>
           ) : (
             <Help>Please select an org unit on the left</Help>

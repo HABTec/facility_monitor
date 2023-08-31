@@ -33,7 +33,7 @@ const userActivityLog = {
 };
 
 const timeAgo = (prevDate) => {
-  return moment(prevDate).fromNow();  
+  return moment(prevDate).fromNow();
 };
 const findLastLogin = (users) => {
   var maxPeriod = undefined;
@@ -69,8 +69,10 @@ const findLastLoginUser = (users) => {
 const DataElementRow = ({
   orgunit,
   userActivityView,
+  userActivityCountView,
   showUserActivity,
-  selectedUser,showRolesChart
+  selectedUser,
+  showRolesChart,
 }) => {
   const [lastLogin, setLastLogin] = useState(null);
   const [lastLoginUser, setLastLoginUser] = useState(null);
@@ -130,13 +132,13 @@ const DataElementRow = ({
 
       setRoles(internal_roles);
 
-      if (lastUser && userActivityView)
+      if (lastUser && userActivityCountView)
         engine
           .query({
             userActivityLog: userActivityLog.userActivity({
-              id: userActivityView,
+              id: userActivityCountView,
               username: lastUser?.userCredentials?.username,
-            }),
+            }), 
           })
           .then((data) => {
             setFrequency(data?.userActivityLog?.pager?.total);
@@ -158,7 +160,7 @@ const DataElementRow = ({
     if (lastLoginUser) {
       showUserActivity(lastLoginUser);
     }
-    if(roles?.length>0){
+    if (roles?.length > 0) {
       showRolesChart(roles);
     }
   };
@@ -169,7 +171,8 @@ const DataElementRow = ({
         key={orgunit?.id}
         selected={
           lastLoginUser
-            ? lastLoginUser?.userCredentials?.username == selectedUser?.userCredentials?.username
+            ? lastLoginUser?.userCredentials?.username ==
+              selectedUser?.userCredentials?.username
             : false
         }
       >
@@ -199,7 +202,8 @@ const DataElementRow = ({
           key={orgunit?.id + role.id}
           selected={
             role.lastLoggedInUser
-              ? role.lastLoggedInUser?.userCredentials?.username == selectedUser?.userCredentials?.username
+              ? role.lastLoggedInUser?.userCredentials?.username ==
+                selectedUser?.userCredentials?.username
               : false
           }
         >
@@ -209,10 +213,9 @@ const DataElementRow = ({
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
               }
-              if(roles?.length>0){
+              if (roles?.length > 0) {
                 showRolesChart(roles);
               }
-              
             }}
           ></DataTableCell>
           <DataTableCell
@@ -221,7 +224,7 @@ const DataElementRow = ({
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
               }
-              if(roles?.length>0){
+              if (roles?.length > 0) {
                 showRolesChart(roles);
               }
             }}
@@ -234,7 +237,7 @@ const DataElementRow = ({
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
               }
-              if(roles?.length>0){
+              if (roles?.length > 0) {
                 showRolesChart(roles);
               }
             }}
@@ -247,7 +250,7 @@ const DataElementRow = ({
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
               }
-              if(roles?.length>0){
+              if (roles?.length > 0) {
                 showRolesChart(roles);
               }
             }}
@@ -260,7 +263,7 @@ const DataElementRow = ({
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
               }
-              if(roles?.length>0){
+              if (roles?.length > 0) {
                 showRolesChart(roles);
               }
             }}
