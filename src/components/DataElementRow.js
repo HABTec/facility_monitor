@@ -1,5 +1,5 @@
 import React from "react";
-import { DataTableRow, DataTableCell, CircularLoader } from "@dhis2/ui";
+import { DataTableRow, DataTableCell, CircularLoader, Tooltip } from "@dhis2/ui";
 import { useState, useEffect } from "react";
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import moment from "moment";
@@ -191,7 +191,7 @@ const DataElementRow = ({
           {loading ? <CircularLoader small /> : data?.orgUnits?.pager?.total}
         </DataTableCell>
         <DataTableCell key={orgunit?.id + "3"} onClick={selectUser}>
-          {lastLogin}
+          <Tooltip content={lastLoginUser?.userCredentials?.lastLogin}> {lastLogin} </Tooltip>
         </DataTableCell>
 
         <DataTableCell key={orgunit?.id + "5"} onClick={selectUser}>
@@ -257,7 +257,7 @@ const DataElementRow = ({
               }
             }}
           >
-            {role.lastLogin}
+            <Tooltip content={role?.lastLoggedInUser?.userCredentials?.lastLogin}>  {role.lastLogin} </Tooltip>
           </DataTableCell>
           <DataTableCell
             key={orgunit?.id + role.id + "5"}

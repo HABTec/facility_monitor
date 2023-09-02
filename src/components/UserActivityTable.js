@@ -16,36 +16,14 @@ import {
   DataTableCell,
   TableFoot,
   Table,
-  DataTableRow,DataTableBody
+  DataTableRow,
+  DataTableBody,
+  Tooltip
 } from "@dhis2/ui";
 
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import moment from "moment";
 
-// const UsersQuery = {
-//   InactiveUsers: ({ orgUnit, includeDisabled, page, pageSize, lastYear }) => {
-//     let filter = [`userCredentials.lastLogin:lt:${lastYear.toISOString()}`];
-//     if (orgUnit) filter.push(`organisationUnits.id:eq:${orgUnit}`);
-
-//     if (!includeDisabled)
-//       filter.push(`userCredentials.disabled:eq:${includeDisabled}`);
-
-//     return {
-//       resource: `users`,
-//       params: {
-//         fields: [
-//           "id,name,phoneNumber,userCredentials[username,disabled,lastLogin,userRoles[id,displayName]]",
-//         ],
-//         filter,
-//         total: true,
-//         paging: true,
-//         page: page,
-//         pageSize: pageSize,
-//         includeChildren: true,
-//       },
-//     };
-//   },
-// };
 
 const timeAgo = (prevDate) => {
   return moment(prevDate).fromNow();
@@ -97,7 +75,6 @@ const UserActivityTable = ({ selectedOrgUnit }) => {
     setUsers(data?.InactiveUsers?.users);
   };
 
-
   const userquery = useDataQuery(UsersQuery, {
     variables: {
       orgUnit: selectedOrgUnit?.id ?? null,
@@ -136,7 +113,7 @@ const UserActivityTable = ({ selectedOrgUnit }) => {
         ))}
       </DataTableCell>
       <DataTableCell key={el?.id + "3"}>
-        {timeAgo(new Date(el.userCredentials?.lastLogin).getTime())}
+        <Tooltip content={el?.userCredentials?.lastLogin}> {timeAgo(new Date(el.userCredentials?.lastLogin).getTime())} </Tooltip>
       </DataTableCell>
     </DataTableRow>
   ));
