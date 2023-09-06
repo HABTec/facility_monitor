@@ -153,9 +153,9 @@ const UserActivityTable = ({ selectedOrgUnit }) => {
       </DataTableCell>
       <DataTableCell key={el?.id + "2"}>{el.phoneNumber}</DataTableCell>
       <DataTableCell key={el?.id + "5"}>
-        {el.userCredentials?.userRoles?.map((role) => (
-          <Chip key={role.id} dense onClick={()=>{setRole(role.displayName);setRefetcher((prev)=>!prev)}}>
-            {role.displayName}
+        {el.userCredentials?.userRoles?.map((role_internal) => (
+          <Chip key={role_internal.id} dense selected={role_internal.displayName==role} onClick={()=>{setRole(role_internal.displayName);setRefetcher((prev)=>!prev)}}>
+            {role_internal.displayName}
           </Chip>
         ))}
       </DataTableCell>
