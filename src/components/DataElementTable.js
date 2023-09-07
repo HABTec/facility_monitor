@@ -34,6 +34,7 @@ const DataElementTable = ({
   
   const [selectedUser, setSelectedUser] = useState();
   const [showRolesBarChart,setShowRolesBarChart]= useState();
+  const [selectedRow, setSelectedRow] =  useState(null);
 
   const rows = orgunits?.map((element) => (
     <DataElementRow
@@ -45,6 +46,8 @@ const DataElementTable = ({
       showUserActivity={setSelectedUser}
       selectedUser={selectedUser}
       showRolesChart={setShowRolesBarChart}
+      selectedRow={selectedRow}
+      setSelectedRow={setSelectedRow}
     ></DataElementRow>
   ));
 

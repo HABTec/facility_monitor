@@ -1,5 +1,11 @@
 import React from "react";
-import { DataTableRow, DataTableCell, CircularLoader, Tooltip } from "@dhis2/ui";
+import {
+  DataTableRow,
+  DataTableCell,
+  CircularLoader,
+  Tooltip,
+  Chip,
+} from "@dhis2/ui";
 import { useState, useEffect } from "react";
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import moment from "moment";
@@ -73,6 +79,8 @@ const DataElementRow = ({
   showUserActivity,
   selectedUser,
   showRolesChart,
+  selectedRow,
+  setSelectedRow,
 }) => {
   const [lastLogin, setLastLogin] = useState(null);
   const [lastLoginUser, setLastLoginUser] = useState(null);
@@ -92,45 +100,40 @@ const DataElementRow = ({
       // Group users by role
       let internal_roles = [];
 
-      data?.orgUnits?.users?.forEach(function (user) {
-        user?.userCredentials?.userRoles.forEach((userRole) => {
-          // check if the role already exists
-          let role = internal_roles.find((e) => e.id == userRole.id);
-          if (!role) {
-            internal_roles.push({
-              ...userRole,
-              users: [user],
-              lastLogin: timeAgo(
-                new Date(user.userCredentials?.lastLogin ?? 0)?.getTime()
-              ),
-              lastLoggedInUser: user,
-            });
-          } else {
-            let index = internal_roles.indexOf(role);
-            role.users.push(user);
-            let lastLoggedUser = findLastLoginUser(role.users);
-            role.lastLogin = timeAgo(findLastLogin(role.users)?.getTime());
-            role.lastLoggedInUser = lastLoggedUser;
-            // internal_roles = [...(roles.filter(e=>e.id!=role.id)),role];
-            internal_roles.splice(index, 1);
-            internal_roles.push(role);
+      for (let x = 0; x < data?.orgUnits?.users.length; x++) {
+        const user = data?.orgUnits?.users[x];
+
+        // Check if there is a list of roles that match the user
+        // {roles:[],users:[],lastLogin, lastLoggedInUser}
+        let is_user_pushed = false;
+        for (let i = 0; i < internal_roles.length; i++) {
+          if (
+            JSON.stringify(...internal_roles[i].roles) ==
+            JSON.stringify(...user.userCredentials.userRoles)
+          ) {
+            internal_roles[i].users.push(user);
+            internal_roles[i].lastLogin = timeAgo(
+              findLastLogin(internal_roles[i].users)?.getTime()
+            );
+            internal_roles[i].lastLoggedInUser = findLastLoginUser(
+              internal_roles[i].users
+            );
+            is_user_pushed = true;
+            break;
           }
-        });
-      });
+        }
 
-      // for(let i=0;i<internal_roles.length;i++){
-      //   engine
-      //     .query({
-      //       userActivityLog: userActivityLog.userActivity({
-      //         id: userActivityView,
-      //         username: internal_roles[i].lastLoggedInUser?.username,
-      //       }),
-      //     })
-      //     .then((data) => {
-      //       internal_roles[i].frequency=data?.userActivityLog?.pager?.total;
-      //     });
-      // }
-
+        if (!is_user_pushed) {
+          internal_roles.push({
+            roles: [...user?.userCredentials?.userRoles],
+            users: [user],
+            lastLogin: timeAgo(
+              new Date(user.userCredentials?.lastLogin ?? 0)?.getTime()
+            ),
+            lastLoggedInUser: user,
+          });
+        }
+      }
       setRoles(internal_roles);
 
       if (lastUser && userActivityCountView)
@@ -139,7 +142,7 @@ const DataElementRow = ({
             userActivityLog: userActivityLog.userActivity({
               id: userActivityCountView,
               username: lastUser?.userCredentials?.username,
-            }), 
+            }),
           })
           .then((data) => {
             setFrequency(data?.userActivityLog?.listGrid?.rows[0]);
@@ -164,19 +167,13 @@ const DataElementRow = ({
     if (roles?.length > 0) {
       showRolesChart(roles);
     }
+
+    if (lastLoginUser || roles?.length > 0) setSelectedRow(orgunit.id);
   };
 
   return (
     <>
-      <DataTableRow
-        key={orgunit?.id}
-        selected={
-          lastLoginUser
-            ? lastLoginUser?.userCredentials?.username ==
-              selectedUser?.userCredentials?.username
-            : false
-        }
-      >
+      <DataTableRow key={orgunit?.id} selected={orgunit?.id == selectedRow}>
         <DataTableCell
           key={orgunit?.id + "4"}
           colSpan={roles.count}
@@ -191,25 +188,23 @@ const DataElementRow = ({
           {loading ? <CircularLoader small /> : data?.orgUnits?.pager?.total}
         </DataTableCell>
         <DataTableCell key={orgunit?.id + "3"} onClick={selectUser}>
-          <Tooltip content={lastLoginUser?.userCredentials?.lastLogin}> {lastLogin} </Tooltip>
+          <Tooltip content={lastLoginUser?.userCredentials?.lastLogin}>
+            {" "}
+            {lastLogin}{" "}
+          </Tooltip>
         </DataTableCell>
 
         <DataTableCell key={orgunit?.id + "5"} onClick={selectUser}>
           {frequency}
         </DataTableCell>
       </DataTableRow>
-      {roles.map((role) => (
+      {roles.map((role, index) => (
         <DataTableRow
-          key={orgunit?.id + role.id}
-          selected={
-            role.lastLoggedInUser
-              ? role.lastLoggedInUser?.userCredentials?.username ==
-                selectedUser?.userCredentials?.username
-              : false
-          }
+          key={orgunit?.id + "rows" + index}
+          selected={selectedRow == orgunit?.id + "rows" + index}
         >
           <DataTableCell
-            key={orgunit?.id + role.id + "4"}
+            key={orgunit?.id + "rows" + index + "4"}
             onClick={() => {
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
@@ -217,10 +212,12 @@ const DataElementRow = ({
               if (roles?.length > 0) {
                 showRolesChart(roles);
               }
+              if (role?.lastLoggedInUser || roles?.length > 0)
+                setSelectedRow(orgunit?.id + "rows" + index);
             }}
           ></DataTableCell>
           <DataTableCell
-            key={orgunit?.id + role.id + "1"}
+            key={orgunit?.id + "rows" + index + "1"}
             onClick={() => {
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
@@ -228,12 +225,17 @@ const DataElementRow = ({
               if (roles?.length > 0) {
                 showRolesChart(roles);
               }
+
+              if (role?.lastLoggedInUser || roles?.length > 0)
+                setSelectedRow(orgunit?.id + "rows" + index);
             }}
           >
-            {role.displayName}
+            {role.roles.map((e) => (
+              <Chip key={e.id}>{e.displayName}</Chip>
+            ))}
           </DataTableCell>
           <DataTableCell
-            key={orgunit?.id + role.id + "2"}
+            key={orgunit?.id + "rows" + index + "2"}
             onClick={() => {
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
@@ -241,26 +243,37 @@ const DataElementRow = ({
               if (roles?.length > 0) {
                 showRolesChart(roles);
               }
+
+              if (role?.lastLoggedInUser || roles?.length > 0)
+                setSelectedRow(orgunit?.id + "rows" + index);
             }}
           >
             {loading ? <CircularLoader small /> : role.users.length}
           </DataTableCell>
           <DataTableCell
-            key={orgunit?.id + role.id + "3"}
+            key={orgunit?.id + "rows" + index + "3"}
             onClick={() => {
-              console.log(role,"here")
+              console.log(role, "here");
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
               }
               if (roles?.length > 0) {
                 showRolesChart(roles);
               }
+
+              if (role?.lastLoggedInUser || roles?.length > 0)
+                setSelectedRow(orgunit.id + role.roles.toString());
             }}
           >
-            <Tooltip content={role?.lastLoggedInUser?.userCredentials?.lastLogin}>  {role.lastLogin} </Tooltip>
+            <Tooltip
+              content={role?.lastLoggedInUser?.userCredentials?.lastLogin}
+            >
+              {" "}
+              {role.lastLogin}{" "}
+            </Tooltip>
           </DataTableCell>
           <DataTableCell
-            key={orgunit?.id + role.id + "5"}
+            key={orgunit?.id + "rows" + index + "5"}
             onClick={() => {
               if (role?.lastLoggedInUser) {
                 showUserActivity(role?.lastLoggedInUser);
@@ -268,6 +281,9 @@ const DataElementRow = ({
               if (roles?.length > 0) {
                 showRolesChart(roles);
               }
+
+              if (role?.lastLoggedInUser || roles?.length > 0)
+                setSelectedRow(orgunit.id + role.roles.toString());
             }}
           >
             {role.frequency}

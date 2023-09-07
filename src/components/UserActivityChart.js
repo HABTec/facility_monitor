@@ -35,6 +35,11 @@ ChartJS.register(
   Legend
 );
 
+
+const timeAgo = (prevDate) => {
+  return moment(prevDate).fromNow();
+};
+
 const userActivityLog = {
   userActivity: ({ id, username }) => ({
     resource: `sqlViews`,
@@ -148,7 +153,7 @@ const UserActivityChart = ({ user, userActivityView, roles }) => {
   };
 
   const dataRoles = {
-    labels: roles.map((role) => role.displayName),
+    labels: roles.map((role) => role.roles.map((r)=>r.displayName+", ")),
     datasets: [
       {
         data: roles.map((role) => role.users.length),
@@ -195,7 +200,7 @@ const UserActivityChart = ({ user, userActivityView, roles }) => {
                   <div style={{ display: "inline-block", padding: "8px" }}>
                     <b>Roles</b>{" "}
                     {user.userCredentials?.userRoles?.map((role) => (
-                      <Chip dense>{role.displayName}</Chip>
+                      <Chip key={role.id} dense>{role.displayName}</Chip>
                     ))}
                   </div>
                 </Help>
