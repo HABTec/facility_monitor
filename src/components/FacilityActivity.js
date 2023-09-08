@@ -2,8 +2,8 @@ import React from "react";
 import classes from "../App.module.css";
 import { SingleSelectOption, SingleSelectField, Pagination } from "@dhis2/ui";
 import YearNavigator from "./YearNavigator.js";
-import DataElementRow from "../components/DataElementRow.js";
-import UserActivityChart from "../components/UserActivityChart";
+import DataElementRow from "./DataElementRow.js";
+import UserActivityChart from "./UserActivityChart";
 import {useState} from "react"
 import {
   DataTable,
@@ -18,7 +18,7 @@ import {
   Tooltip,Card, 
 } from "@dhis2/ui";
 
-const DataElementTable = ({
+const FacilityActivity = ({
   loading,
   orgunits,
   selectedOrgUnit,
@@ -110,4 +110,4 @@ const DataElementTable = ({
   );
 };
 
-export default DataElementTable;
+export default FacilityActivity;

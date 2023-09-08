@@ -2,28 +2,15 @@ import React from "react";
 import classes from "../App.module.css";
 import { OrganisationUnitTree, Pagination } from "@dhis2/ui";
 import { useState, useEffect } from "react";
-import DataElementGroupSelect from "../components/DataElementGroupSelect.js";
-import PeroidSelect from "../components/PeriodSelect.js";
 import getCurrentDate from "../memo/getCurrentDate.js";
 import usePeriods from "../memo/usePeriod.js";
 import { spacers, spacersNum, Tab, TabBar, Help } from "@dhis2/ui";
 
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
-import DataElementTable from "../components/DataElementTable";
+import FacilityActivity from "../components/FacilityActivity";
 import OrgunitWidget from "../components/OrgunitWidget";
 import UserActivityTable from "../components/UserActivityTable";
-//const selectedDataElmentGroupQuery = {
-//  dataElements: {
-//    resource: "dataElementGroups",
-//    params: ({ selectedDataElementGroup }) => ({
-//      fields: [
-//        "dataElements[id,displayName,categoryCombo[categoryOptionCombos::size,],dataSetElements[dataSet[id,periodType,categoryCombo[categoryOptionCombos::size],]]]",
-//      ],
-//      filter: `id:eq:${selectedDataElementGroup}`,
-//      paging: false,
-//    }),
-//  },
-//};
+
 
 //query orgunits that blong to a dataset and are memeber of an org unit and only facilities
 const validOrgUnitsQuery = {
@@ -39,18 +26,7 @@ const validOrgUnitsQuery = {
   }),
 };
 
-//
-//const dataValueSetQuery = {
-//  dataValues:({ period, dataElementGroup, orgUnit }) => ({
-//    resource: "dataValueSets",
-//    params: {
-//      period,
-//      orgUnit,
-//      dataElementGroup,
-//      children: true,
-//    },
-//  })
-//};
+
 // sqlViews?filter=displayName:like:userActivity
 const userActivityViewQuery = {
   userActivityView: {
@@ -221,7 +197,7 @@ const Home = (props) => {
             ></UserActivityTable>
           ) : selectedOrgUnit?.id ? (
             <>
-              <DataElementTable
+              <FacilityActivity
                 loading={loading}
                 orgunits={orgUnits}
                 selectedOrgUnit={selectedOrgUnit}
@@ -233,7 +209,7 @@ const Home = (props) => {
                 total={totalPages}
                 userActivityView={userActivityView}
                 userActivityCountView = {userActivityCountView}
-              ></DataElementTable>
+              ></FacilityActivity>
             </>
           ) : (
             <Help>Please select an org unit on the left</Help>
