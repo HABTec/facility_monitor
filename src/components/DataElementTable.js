@@ -98,7 +98,6 @@ const DataElementTable = ({
     </div> 
       <div style={{
           marginTop: spacers.dp24,
-          marginRight: "2%",
           minWidth: "50%",
           maxWidth: "50%"
         }}>
