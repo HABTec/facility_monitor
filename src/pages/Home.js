@@ -10,7 +10,7 @@ import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import FacilityActivity from "../components/FacilityActivity";
 import OrgunitWidget from "../components/OrgunitWidget";
 import UserActivityTable from "../components/UserActivityTable";
-
+import OnlineUserTable from "../components/OnlineUserTable";
 
 //query orgunits that blong to a dataset and are memeber of an org unit and only facilities
 const validOrgUnitsQuery = {
@@ -25,7 +25,6 @@ const validOrgUnitsQuery = {
     },
   }),
 };
-
 
 // sqlViews?filter=displayName:like:userActivity
 const userActivityViewQuery = {
@@ -60,7 +59,7 @@ const Home = (props) => {
   const [pageCount, setPageCount] = useState(1);
   const [totalPages, setTotalPages] = useState(10);
 
-  const [showUserActivity, setShowUserActivity] = useState(false);
+  const [showTab, setShowTab] = useState("default");
 
   const periods = usePeriods({
     periodType,
@@ -81,18 +80,25 @@ const Home = (props) => {
   const [userActivityCountView, setUserActivityCountView] = useState(null);
   useDataQuery(userActivityViewQuery, {
     onComplete: (data) => {
-      if (data?.userActivityView?.sqlViews.length > 0){
-        
-        let userActivityArray = data?.userActivityView?.sqlViews.filter((e)=>e.displayName=="userActivity");
-        let userActivityCountArray = data?.userActivityView?.sqlViews.filter((e)=>e.displayName=="userActivityCount");
+      if (data?.userActivityView?.sqlViews.length > 0) {
+        let userActivityArray = data?.userActivityView?.sqlViews.filter(
+          (e) => e.displayName == "userActivity"
+        );
+        let userActivityCountArray = data?.userActivityView?.sqlViews.filter(
+          (e) => e.displayName == "userActivityCount"
+        );
 
-        if(userActivityArray.length>0 || userActivityCountArray.length >0){
+        if (userActivityArray.length > 0 || userActivityCountArray.length > 0) {
           setUserActivityView(userActivityArray[0].id);
           setUserActivityCountView(userActivityCountArray[0].id);
-        }else
-          alert("Error: create two sql views with name: userActivity and userActivityCount, type:query and SQL: SELECT username,eventtype,extract(day from timestamp) as day,count(*) from datastatisticsevent where age(now(),timestamp) < '1 months'::interval and  username = '${username}' GROUP BY username,eventtype,extract(day from timestamp) userActivityCount's SQL must be SELECT username, eventtype, extract( day from timestamp ) as day,  count(*) from datastatisticsevent where  age(now(), timestamp) < '1 months' :: interval and username = '${username}' GROUP BY username, eventtype, extract( day  from timestamp ) ");
-    } else {
-        alert("Error: create two sql views with name: userActivity and userActivityCount, type:query and SQL: SELECT username,eventtype,extract(day from timestamp) as day,count(*) from datastatisticsevent where age(now(),timestamp) < '1 months'::interval and  username = '${username}' GROUP BY username,eventtype,extract(day from timestamp) userActivityCount's SQL must be SELECT username, eventtype, extract( day from timestamp ) as day,  count(*) from datastatisticsevent where  age(now(), timestamp) < '1 months' :: interval and username = '${username}' GROUP BY username, eventtype, extract( day  from timestamp ) ");
+        } else
+          alert(
+            "Error: create two sql views with name: userActivity and userActivityCount, type:query and SQL: SELECT username,eventtype,extract(day from timestamp) as day,count(*) from datastatisticsevent where age(now(),timestamp) < '1 months'::interval and  username = '${username}' GROUP BY username,eventtype,extract(day from timestamp) userActivityCount's SQL must be SELECT username, eventtype, extract( day from timestamp ) as day,  count(*) from datastatisticsevent where  age(now(), timestamp) < '1 months' :: interval and username = '${username}' GROUP BY username, eventtype, extract( day  from timestamp ) "
+          );
+      } else {
+        alert(
+          "Error: create two sql views with name: userActivity and userActivityCount, type:query and SQL: SELECT username,eventtype,extract(day from timestamp) as day,count(*) from datastatisticsevent where age(now(),timestamp) < '1 months'::interval and  username = '${username}' GROUP BY username,eventtype,extract(day from timestamp) userActivityCount's SQL must be SELECT username, eventtype, extract( day from timestamp ) as day,  count(*) from datastatisticsevent where  age(now(), timestamp) < '1 months' :: interval and username = '${username}' GROUP BY username, eventtype, extract( day  from timestamp ) "
+        );
       }
     },
   });
@@ -175,44 +181,60 @@ const Home = (props) => {
           <TabBar>
             <Tab
               onClick={() => {
-                setShowUserActivity(false);
+                setShowTab("default");
               }}
-              selected={!showUserActivity}
+              selected={showTab=="default"}
             >
               Facility Activity
             </Tab>
             <Tab
               onClick={() => {
-                setShowUserActivity(true);
+                setShowTab("userActivity");
               }}
-              selected={showUserActivity}
+              selected={showTab == "userActivity"}
             >
               User Activity
             </Tab>
+            <Tab
+              onClick={() => {
+                setShowTab("onlineUsers");
+              }}
+              selected={showTab == "onlineUsers"}
+            >
+              Users Online
+            </Tab>
           </TabBar>
 
-          {showUserActivity ? (
+          {showTab == "userActivity" ? (
             <UserActivityTable
               selectedOrgUnit={selectedOrgUnit}
             ></UserActivityTable>
-          ) : selectedOrgUnit?.id ? (
-            <>
-              <FacilityActivity
-                loading={loading}
-                orgunits={orgUnits}
-                selectedOrgUnit={selectedOrgUnit}
-                setPage={setPage}
-                setPageSize={setPageSize}
-                page={page}
-                pageCount={pageCount}
-                pageSize={pageSize}
-                total={totalPages}
-                userActivityView={userActivityView}
-                userActivityCountView = {userActivityCountView}
-              ></FacilityActivity>
-            </>
+          ) : showTab == "default" ? (
+            selectedOrgUnit?.id ? (
+              <>
+                <FacilityActivity
+                  loading={loading}
+                  orgunits={orgUnits}
+                  selectedOrgUnit={selectedOrgUnit}
+                  setPage={setPage}
+                  setPageSize={setPageSize}
+                  page={page}
+                  pageCount={pageCount}
+                  pageSize={pageSize}
+                  total={totalPages}
+                  userActivityView={userActivityView}
+                  userActivityCountView={userActivityCountView}
+                ></FacilityActivity>
+              </>
+            ) : (
+              <Help>Please select an org unit on the left</Help>
+            )
+          ) : showTab == "onlineUsers" ? (
+            <OnlineUserTable
+              selectedOrgUnit={selectedOrgUnit}
+            ></OnlineUserTable>
           ) : (
-            <Help>Please select an org unit on the left</Help>
+            <></>
           )}
         </div>
       </div>
