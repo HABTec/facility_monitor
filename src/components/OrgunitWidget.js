@@ -9,6 +9,7 @@ import {
   StackedTableRowHead,
   StackedTableCell,
   CircularLoader,
+  Tooltip,
 } from "@dhis2/ui";
 import { useState, useEffect } from "react";
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
@@ -30,7 +31,7 @@ const UsersQuery = {
 };
 
 const timeAgo = (prevDate) => {
-  return moment(prevDate).fromNow();  
+  return moment(prevDate).fromNow();
 };
 const findLastLogin = (users) => {
   var maxPeriod = undefined;
@@ -66,6 +67,11 @@ const OrgunitWidget = ({ orgunit }) => {
       .then(handelLoadComplete);
   }, [orgunit?.id]);
 
+  const userCountHelpMessage =
+    "Number of users assigned to the '" + orgunit.displayName + "' Orgunit";
+    const childrenHelpMessage = "Child Orgunit count that directly under '"+orgunit.displayName+"'";
+    const lastActive = "The last active time of users who are assigned to '"+orgunit.displayName+"'";
+
   return (
     <div
       style={{
@@ -77,7 +83,7 @@ const OrgunitWidget = ({ orgunit }) => {
       <StackedTable>
         <StackedTableHead>
           <StackedTableRowHead>
-            <StackedTableCellHead>Selected Orgunits</StackedTableCellHead>
+            <StackedTableCellHead>Selected Orgunit</StackedTableCellHead>
             <StackedTableCellHead>User Count</StackedTableCellHead>
             <StackedTableCellHead>Children</StackedTableCellHead>
             <StackedTableCellHead>Last Active</StackedTableCellHead>
@@ -85,10 +91,12 @@ const OrgunitWidget = ({ orgunit }) => {
         </StackedTableHead>
         <StackedTableBody>
           <StackedTableRow>
-            <StackedTableCell>{orgunit.displayName}</StackedTableCell>
-            <StackedTableCell>{userCount}</StackedTableCell>
-            <StackedTableCell>{orgunit.children}</StackedTableCell>
-            <StackedTableCell>{lastLogin}</StackedTableCell>
+            <StackedTableCell> <Tooltip content="Currently selected Orgunit">{orgunit.displayName}</Tooltip></StackedTableCell>
+            <StackedTableCell>
+              <Tooltip content={userCountHelpMessage}>{userCount}</Tooltip>
+            </StackedTableCell>
+            <StackedTableCell><Tooltip content={childrenHelpMessage}>{orgunit.children}</Tooltip></StackedTableCell>
+            <StackedTableCell><Tooltip content={lastActive}>{lastLogin}</Tooltip></StackedTableCell>
           </StackedTableRow>
         </StackedTableBody>
       </StackedTable>
